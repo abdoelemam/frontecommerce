@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useCartStore } from "@/store/useCartStore";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -10,7 +10,8 @@ import { toast } from "@/store/useToastStore";
 
 export default function ShoppingCartPage() {
   const cartItems = useCartStore((state) => state.items);
-  const _hasHydrated = useCartStore((state) => state._hasHydrated);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const updateQuantity = useCartStore((state) => state.updateQuantity);
   const removeItem = useCartStore((state) => state.removeItem);
   const appliedCoupon = useCartStore((state) => state.appliedCoupon);
@@ -29,7 +30,7 @@ export default function ShoppingCartPage() {
   const total = Math.max(0, subtotal - discountValue);
 
   // Show loading skeleton while cart is hydrating from localStorage
-  if (!_hasHydrated) {
+  if (!mounted) {
     return (
       <div className="max-w-container-max mx-auto px-gutter py-xl">
         <div className="mb-xl text-center mt-sm">
@@ -44,7 +45,6 @@ export default function ShoppingCartPage() {
       </div>
     );
   }
-
 
 
   const handleApplyPromo = async (e: React.FormEvent) => {

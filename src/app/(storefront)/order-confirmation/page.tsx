@@ -5,23 +5,23 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { orderService } from "@/services/orderService";
+import Cookies from "js-cookie";
 
 function OrderConfirmationContent() {
   const searchParams = useSearchParams();
   const [orderId, setOrderId] = useState<string | null>(null);
 
-  // Get orderId from URL or localStorage (fallback for Paymob redirect)
+  // Get orderId from URL or cookie (fallback for Paymob redirect which doesn't pass orderId)
   useEffect(() => {
     const urlOrderId = searchParams.get("orderId");
     if (urlOrderId) {
       setOrderId(urlOrderId);
     } else {
-      // Paymob redirects without orderId in URL, so we saved it before redirecting
-      const saved = localStorage.getItem("lastOrderId");
+      // Paymob redirects without orderId in URL, so we saved it in a cookie before redirecting
+      const saved = Cookies.get("lastOrderId");
       if (saved) {
         setOrderId(saved);
-        // Clean up so old order doesn't show on next visit
-        localStorage.removeItem("lastOrderId");
+        Cookies.remove("lastOrderId"); // Clean up after use
       }
     }
   }, [searchParams]);

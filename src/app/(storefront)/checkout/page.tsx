@@ -7,6 +7,7 @@ import { useCartStore } from "@/store/useCartStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { userService } from "@/services/userService";
 import { orderService } from "@/services/orderService";
+import Cookies from "js-cookie";
 
 export default function CheckoutPage() {
   const cartItems = useCartStore((state) => state.items);
@@ -58,9 +59,9 @@ export default function CheckoutPage() {
     onSuccess: async (response) => {
       const orderId = response.data?.order?._id || response.data?.order?.id;
       
-      // Save orderId BEFORE clearing cart so confirmation page can find it
+      // Save orderId in a cookie BEFORE clearing cart so confirmation page can find it
       if (orderId) {
-        localStorage.setItem("lastOrderId", orderId);
+        Cookies.set("lastOrderId", orderId, { expires: 1 }); // expires in 1 day
       }
 
       // Clear Zustand cart
