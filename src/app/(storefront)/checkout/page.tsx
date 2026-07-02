@@ -14,6 +14,8 @@ export default function CheckoutPage() {
   const clearCart = useCartStore((state) => state.clearCart);
   const appliedCoupon = useCartStore((state) => state.appliedCoupon);
   const token = useAuthStore((state) => state.token);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   // Form States
   const [email, setEmail] = useState("");
@@ -111,7 +113,20 @@ export default function CheckoutPage() {
     createOrderMutation.mutate(orderPayload);
   };
 
-  if (cartItems.length === 0) {
+  // Show skeleton while cart is loading from localStorage (SSR hydration)
+  if (!mounted) {
+    return (
+      <div className="max-w-container-max mx-auto px-gutter py-xl">
+        <div className="animate-pulse space-y-md max-w-2xl mx-auto mt-xl">
+          <div className="h-8 bg-surface-container-highest rounded w-1/3" />
+          <div className="h-48 bg-surface-container-highest rounded" />
+          <div className="h-48 bg-surface-container-highest rounded" />
+        </div>
+      </div>
+    );
+  }
+
+  if (cartItems.length === 0 && !redirectingPaymob) {
     return (
       <div className="max-w-container-max mx-auto px-gutter py-xxl text-center font-body">
         <span className="material-symbols-outlined text-[48px] text-on-surface-variant mb-sm">shopping_cart</span>

@@ -10,6 +10,7 @@ import Cookies from "js-cookie";
 function OrderConfirmationContent() {
   const searchParams = useSearchParams();
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [orderIdResolved, setOrderIdResolved] = useState(false);
 
   // Get orderId from URL or cookie (fallback for Paymob redirect which doesn't pass orderId)
   useEffect(() => {
@@ -24,6 +25,8 @@ function OrderConfirmationContent() {
         Cookies.remove("lastOrderId"); // Clean up after use
       }
     }
+    // Mark as resolved ONLY after checking both URL and cookie
+    setOrderIdResolved(true);
   }, [searchParams]);
 
   // Fetch real order by ID
@@ -33,10 +36,15 @@ function OrderConfirmationContent() {
     enabled: !!orderId,
   });
 
-  if (isLoading) {
+  // Still determining orderId (reading from cookie) — show loading
+  if (!orderIdResolved || isLoading) {
     return (
       <div className="max-w-container-max mx-auto px-gutter py-xxl text-center font-body text-[14px]">
-        Loading order confirmation details...
+        <div className="animate-pulse space-y-4 max-w-md mx-auto">
+          <div className="h-16 bg-surface-container-highest rounded-full w-16 mx-auto" />
+          <div className="h-6 bg-surface-container-highest rounded w-3/4 mx-auto" />
+          <div className="h-4 bg-surface-container-highest rounded w-1/2 mx-auto" />
+        </div>
       </div>
     );
   }
