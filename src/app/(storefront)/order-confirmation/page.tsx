@@ -39,6 +39,9 @@ function OrderConfirmationContent() {
     setOrderIdResolved(true);
   }, [searchParams]);
 
+  // If Paymob says success=true, show success even if we can't load the order details
+  const paymobSuccess = searchParams.get("success") === "true";
+
   // Fetch real order by ID
   const { data: order, isLoading, error } = useQuery({
     queryKey: ["orderDetails", orderId],
@@ -63,6 +66,35 @@ function OrderConfirmationContent() {
     // DEBUG: Show all URL params to understand what Paymob is sending
     const allParams: Record<string, string> = {};
     searchParams.forEach((value, key) => { allParams[key] = value; });
+
+    // If Paymob says payment was successful, show a friendly success screen
+    // even if we can't load the full order details yet
+    if (paymobSuccess) {
+      return (
+        <div className="max-w-md md:max-w-2xl mx-auto px-gutter py-xxl font-body">
+          <div className="bg-white p-lg border border-outline-variant/20 rounded-lg shadow-sm text-center flex flex-col items-center">
+            <span className="material-symbols-outlined text-[64px] text-secondary mb-md" style={{ fontVariationSettings: "'FILL' 1" }}>
+              check_circle
+            </span>
+            <span className="text-[11px] font-bold text-secondary uppercase tracking-widest block mb-2">Payment Successful</span>
+            <h1 className="font-display text-[28px] md:text-[36px] text-primary font-bold mb-xs">
+              Thank you for your order!
+            </h1>
+            <p className="font-body text-[14px] text-on-surface-variant max-w-md mb-lg">
+              Your payment has been processed successfully. You will receive a confirmation email shortly with your order details and invoice.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-md w-full mt-md">
+              <Link href="/collections" className="flex-1 bg-primary text-white font-body text-[11px] font-bold uppercase tracking-widest py-3.5 px-6 hover:opacity-90 text-center">
+                Continue Shopping
+              </Link>
+              <Link href="/account" className="flex-1 border border-outline-variant/60 text-on-surface-variant font-body text-[11px] font-bold uppercase tracking-widest py-3.5 px-6 hover:border-primary hover:text-primary text-center">
+                View My Orders
+              </Link>
+            </div>
+          </div>
+        </div>
+      );
+    }
 
     return (
       <div className="max-w-container-max mx-auto px-gutter py-xxl text-center font-body">
@@ -90,6 +122,7 @@ function OrderConfirmationContent() {
       </div>
     );
   }
+
 
   const finalTotal = order.priceAfterDiscount !== undefined && order.priceAfterDiscount !== order.totalPrice
     ? order.priceAfterDiscount
