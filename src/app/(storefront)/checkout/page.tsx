@@ -58,6 +58,11 @@ export default function CheckoutPage() {
     onSuccess: async (response) => {
       const orderId = response.data?.order?._id || response.data?.order?.id;
       
+      // Save orderId BEFORE clearing cart so confirmation page can find it
+      if (orderId) {
+        localStorage.setItem("lastOrderId", orderId);
+      }
+
       // Clear Zustand cart
       clearCart();
 

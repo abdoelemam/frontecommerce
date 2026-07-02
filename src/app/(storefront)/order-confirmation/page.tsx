@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
@@ -8,7 +8,23 @@ import { orderService } from "@/services/orderService";
 
 function OrderConfirmationContent() {
   const searchParams = useSearchParams();
-  const orderId = searchParams.get("orderId");
+  const [orderId, setOrderId] = useState<string | null>(null);
+
+  // Get orderId from URL or localStorage (fallback for Paymob redirect)
+  useEffect(() => {
+    const urlOrderId = searchParams.get("orderId");
+    if (urlOrderId) {
+      setOrderId(urlOrderId);
+    } else {
+      // Paymob redirects without orderId in URL, so we saved it before redirecting
+      const saved = localStorage.getItem("lastOrderId");
+      if (saved) {
+        setOrderId(saved);
+        // Clean up so old order doesn't show on next visit
+        localStorage.removeItem("lastOrderId");
+      }
+    }
+  }, [searchParams]);
 
   // Fetch real order by ID
   const { data: order, isLoading, error } = useQuery({

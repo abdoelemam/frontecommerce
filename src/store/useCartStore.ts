@@ -5,6 +5,7 @@ import { CartItem } from '../types/cart';
 interface CartState {
   items: CartItem[];
   isOpen: boolean;
+  _hasHydrated: boolean;
   appliedCoupon: { code: string; discountAmount: number } | null;
   setIsOpen: (isOpen: boolean) => void;
   addItem: (item: CartItem) => void;
@@ -12,6 +13,7 @@ interface CartState {
   updateQuantity: (productId: string, quantity: number, variantId?: string) => void;
   setAppliedCoupon: (coupon: { code: string; discountAmount: number } | null) => void;
   clearCart: () => void;
+  setHasHydrated: (v: boolean) => void;
 }
 
 export const useCartStore = create<CartState>()(
@@ -19,8 +21,10 @@ export const useCartStore = create<CartState>()(
     (set, get) => ({
       items: [],
       isOpen: false,
+      _hasHydrated: false,
       appliedCoupon: null,
       setIsOpen: (isOpen) => set({ isOpen }),
+      setHasHydrated: (v) => set({ _hasHydrated: v }),
       
       setAppliedCoupon: (coupon) => set({ appliedCoupon: coupon }),
       
@@ -61,6 +65,9 @@ export const useCartStore = create<CartState>()(
     }),
     {
       name: 'ecommerce-cart-storage', // unique name for localStorage key
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
     }
   )
 );

@@ -10,6 +10,7 @@ import { toast } from "@/store/useToastStore";
 
 export default function ShoppingCartPage() {
   const cartItems = useCartStore((state) => state.items);
+  const _hasHydrated = useCartStore((state) => state._hasHydrated);
   const updateQuantity = useCartStore((state) => state.updateQuantity);
   const removeItem = useCartStore((state) => state.removeItem);
   const appliedCoupon = useCartStore((state) => state.appliedCoupon);
@@ -26,6 +27,25 @@ export default function ShoppingCartPage() {
   const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const discountValue = appliedCoupon?.discountAmount || 0;
   const total = Math.max(0, subtotal - discountValue);
+
+  // Show loading skeleton while cart is hydrating from localStorage
+  if (!_hasHydrated) {
+    return (
+      <div className="max-w-container-max mx-auto px-gutter py-xl">
+        <div className="mb-xl text-center mt-sm">
+          <h1 className="font-display text-[36px] md:text-[48px] text-primary uppercase font-bold">Your Shopping Bag</h1>
+          <p className="font-body text-[14px] text-on-surface-variant mt-1">Review your selections before proceeding to secure checkout.</p>
+        </div>
+        <div className="animate-pulse space-y-md max-w-3xl mx-auto">
+          {[1, 2].map(i => (
+            <div key={i} className="h-24 bg-surface-container-highest rounded-lg" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+
 
   const handleApplyPromo = async (e: React.FormEvent) => {
     e.preventDefault();
