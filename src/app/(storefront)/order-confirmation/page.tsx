@@ -60,6 +60,10 @@ function OrderConfirmationContent() {
   }
 
   if (error || !order) {
+    // DEBUG: Show all URL params to understand what Paymob is sending
+    const allParams: Record<string, string> = {};
+    searchParams.forEach((value, key) => { allParams[key] = value; });
+
     return (
       <div className="max-w-container-max mx-auto px-gutter py-xxl text-center font-body">
         <span className="material-symbols-outlined text-[48px] text-error mb-md">error</span>
@@ -67,7 +71,20 @@ function OrderConfirmationContent() {
         <p className="font-body text-[14px] text-on-surface-variant mb-md">
           The order number you are querying could not be verified in our records.
         </p>
-        <Link href="/" className="bg-primary text-white font-body text-[11px] font-bold uppercase tracking-widest py-3 px-6">
+        {/* TEMP DEBUG - Remove after fixing */}
+        <div className="mt-4 p-4 bg-gray-100 rounded text-left text-xs font-mono max-w-2xl mx-auto overflow-auto">
+          <p className="font-bold mb-2">Debug - URL Params received:</p>
+          <p className="mb-1">orderId: <strong>{searchParams.get("orderId") || "NOT FOUND"}</strong></p>
+          <p className="mb-1">merchant_order_id: <strong>{searchParams.get("merchant_order_id") || "NOT FOUND"}</strong></p>
+          <p className="mb-1">success: <strong>{searchParams.get("success") || "NOT FOUND"}</strong></p>
+          <p className="mb-1">Cookie lastOrderId: <strong>{Cookies.get("lastOrderId") || "NOT FOUND"}</strong></p>
+          <p className="mb-1">Resolved orderId: <strong>{orderId || "NULL"}</strong></p>
+          <details className="mt-2">
+            <summary className="cursor-pointer">All params</summary>
+            <pre className="text-[10px] mt-1 whitespace-pre-wrap break-all">{JSON.stringify(allParams, null, 2)}</pre>
+          </details>
+        </div>
+        <Link href="/" className="bg-primary text-white font-body text-[11px] font-bold uppercase tracking-widest py-3 px-6 mt-4 inline-block">
           Return to Homepage
         </Link>
       </div>
