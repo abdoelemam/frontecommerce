@@ -12,20 +12,30 @@ function OrderConfirmationContent() {
   const [orderId, setOrderId] = useState<string | null>(null);
   const [orderIdResolved, setOrderIdResolved] = useState(false);
 
-  // Get orderId from URL or cookie (fallback for Paymob redirect which doesn't pass orderId)
   useEffect(() => {
+    // 1. Direct link with orderId (cash payment flow)
     const urlOrderId = searchParams.get("orderId");
     if (urlOrderId) {
       setOrderId(urlOrderId);
-    } else {
-      // Paymob redirects without orderId in URL, so we saved it in a cookie before redirecting
-      const saved = Cookies.get("lastOrderId");
-      if (saved) {
-        setOrderId(saved);
-        Cookies.remove("lastOrderId"); // Clean up after use
-      }
+      setOrderIdResolved(true);
+      return;
     }
-    // Mark as resolved ONLY after checking both URL and cookie
+
+    // 2. Paymob redirect: includes merchant_order_id = "MONGODBID_TIMESTAMP"
+    const merchantOrderId = searchParams.get("merchant_order_id");
+    if (merchantOrderId) {
+      const dbOrderId = merchantOrderId.split("_")[0];
+      setOrderId(dbOrderId);
+      setOrderIdResolved(true);
+      return;
+    }
+
+    // 3. Fallback: cookie (set before redirecting to Paymob)
+    const saved = Cookies.get("lastOrderId");
+    if (saved) {
+      setOrderId(saved);
+      Cookies.remove("lastOrderId");
+    }
     setOrderIdResolved(true);
   }, [searchParams]);
 
